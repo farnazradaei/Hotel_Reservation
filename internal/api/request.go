@@ -88,6 +88,13 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.WriteHeader(http.StatusOK)
-	w.Write([]byte("login successful"))
+    token, err := service.Login(req.Email, req.Password)
+    if err != nil {
+        http.Error(w, err.Error(), http.StatusUnauthorized)
+        return
+    }
+
+    resp := map[string]string{"token": token}
+    json.NewEncoder(w).Encode(resp)
+
 }

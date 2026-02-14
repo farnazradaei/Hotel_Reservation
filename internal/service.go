@@ -1,9 +1,10 @@
 package internal
 
 import (
+	auth "Hotel_reservation/Auth"
 	storage "Hotel_reservation/storage"
 	"errors"
-	auth "Hotel_reservation/Auth"
+    "github.com/golang-jwt/jwt/v5"
 )
 
 type User struct {
@@ -41,15 +42,33 @@ func Signup(email, password string) error {
     return  nil
 }
 
-func Login(email, password string) error {
+func Login(email, password string) (string, error) {
 	user, err := storage.GetUserByEmail(email)
-	if err != nil {
-		return errors.New("invalid credentials")
+    if err != nil {
+		return "", err
 	}
+
+	// if user == nil {
+	// 	return "", errors.New("invalid credentials")
+	// }
 
 	if !auth.CheckPasswordHash(password, user.Hash) {
-		return errors.New("invalid credentials")
+		return "", errors.New("invalid credentials")
 	}
 
-	return nil
+
+    var jwtSecret = []byte("my-super-secret")
+
+    token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+        "user_id": user.ID,
+        "email":   user.Email,
+        "exp":     time.Now().Add(time.Hour * 24).Unix(), 
+    })
+
+    tokenString, err := token.SignedString(jwtSecret)
+    if err != nil {
+        return "", err
+    }
+
+    return tokenString, nil
 }
