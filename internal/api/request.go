@@ -5,7 +5,7 @@ import (
 	"errors"
 	"net/http"
 	"regexp"
-	"Hotel_reservation/internal/service" 
+	"Hotel_reservation/internal/user"
 )
 
 type UserRequest struct {
@@ -30,7 +30,7 @@ func Signup(w http.ResponseWriter , r *http.Request){
 		return
 	}
 
-	err := service.Signup(req.Email, req.Password)
+	err := user.Signup(req.Email, req.Password)
 	if err != nil {
 		http.Error(w, "signup failed", http.StatusInternalServerError)
 		return
@@ -82,19 +82,14 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err := service.Login(req.Email, req.Password)
-	if err != nil {
-		http.Error(w, "invalid credentials", http.StatusUnauthorized)
-		return
-	}
-
-    token, err := service.Login(req.Email, req.Password)
+    token, err := user.Login(req.Email, req.Password)
     if err != nil {
-        http.Error(w, err.Error(), http.StatusUnauthorized)
+        http.Error(w, "invalid credentials", http.StatusUnauthorized)
         return
     }
 
     resp := map[string]string{"token": token}
+	w.Header().Set("content-type", "application/json")
     json.NewEncoder(w).Encode(resp)
 
 }
