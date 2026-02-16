@@ -32,7 +32,7 @@ func Signup(w http.ResponseWriter , r *http.Request){
 
 	err := user.Signup(req.Email, req.Password)
 	if err != nil {
-		http.Error(w, "signup failed", http.StatusInternalServerError)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 	w.WriteHeader(http.StatusCreated)

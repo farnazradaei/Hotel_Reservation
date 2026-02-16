@@ -32,8 +32,9 @@ func init(){
 
 
 func main(){
-	http.HandleFunc("/signup" , api.Signup)
-
+	http.HandleFunc("/signup", api.Signup)
+	http.HandleFunc("/login",api.LoginHandler)
+	
 	fmt.Println("Server started on :8080")
 	http.ListenAndServe(": 8080" , nil)
 	
