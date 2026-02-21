@@ -1,11 +1,11 @@
 package api
 
 import (
+	"Hotel_reservation/internal/user"
 	"encoding/json"
 	"errors"
 	"net/http"
 	"regexp"
-	"Hotel_reservation/internal/user"
 )
 
 type UserRequest struct {
@@ -13,7 +13,15 @@ type UserRequest struct {
 	Password string  `json:"password"`
 }
 
-func Signup(w http.ResponseWriter , r *http.Request){
+type Handler struct {
+	service  *user.Service
+}
+
+func NewHandler(service *user.Service) *Handler{
+	return &Handler{service: service}
+}
+
+func (h *Handler)Signup(w http.ResponseWriter , r *http.Request){
 	if r.Method != http.MethodPost {
 		http.Error(w, "method ot allowed", http.StatusMethodNotAllowed)
 		return
@@ -30,7 +38,7 @@ func Signup(w http.ResponseWriter , r *http.Request){
 		return
 	}
 
-	err := user.Signup(req.Email, req.Password)
+	err := h.service.Signup(req.Email, req.Password)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -65,7 +73,7 @@ func validatsignup (r UserRequest) error{
 }
 
 
-func LoginHandler(w http.ResponseWriter, r *http.Request) {
+func (h *Handler)LoginHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
 		return
@@ -82,7 +90,7 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-    token, err := user.Login(req.Email, req.Password)
+    token, err := h.service.Login(req.Email, req.Password)
     if err != nil {
         http.Error(w, "invalid credentials", http.StatusUnauthorized)
         return
