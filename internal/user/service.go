@@ -1,9 +1,8 @@
 package user
 
 import (
-	storage "Hotel_reservation/storage"
+	"Hotel_reservation/internal/auth"
 	"errors"
-    "Hotel_reservation/internal/auth"
 )
 
 type User struct {
@@ -12,9 +11,17 @@ type User struct {
 	Hash  string
 }
 
-func Signup(email, password string) error {
+type Service struct {
+    Storage UserStorage
+}
 
-    exists, err := storage.UserExsist(email)
+func NewService(storage UserStorage) *Service {
+    return &Service{Storage: storage}
+}
+
+func (s *Service)Signup(email, password string) error {
+
+    exists, err := s.Storage.UserExsist(email)
     if err != nil {
         return err
     }
@@ -27,22 +34,19 @@ func Signup(email, password string) error {
     if err!= nil {
         return err
     }
-
-    id := storage.NextID()
     
-    user := storage.User {
-        ID:       id,
+    user := User {
         Email:    email,
         Hash:     hash,
     }
-    if err := storage.UserSave(user); err != nil {
+    if err := s.Storage.UserSave(user); err != nil {
         return err
     }
     return  nil
 }
 
-func Login(email, password string) (string, error) {
-	user, err := storage.GetUserByEmail(email)
+func (s *Service)Login(email, password string) (string, error) {
+	user, err := s.Storage.GetUserByEmail(email)
 	if err != nil {
 		return "", err
 	}
