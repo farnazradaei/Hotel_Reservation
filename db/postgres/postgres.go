@@ -28,7 +28,7 @@ func ( p *PostgresStore) UserExsist(email string) (bool, error) {
 
 func (p *PostgresStore) UserSave(u user.User) error {	
 	query := `
-	INSERT INTO users (email, password)
+	INSERT INTO users (email, hashpassword)
 	VALUES($1, $2)
 	`
 	_, err := p.db.Exec(query, u.Email, u.Hash)
@@ -39,7 +39,7 @@ func (p *PostgresStore) GetUserByEmail (email string) (user.User, error){
 	var u user.User
 
 	query := `
-	SELECT id, email, hash
+	SELECT id, email, hashpassword
 	FROM users
 	WHERE email = $1
 	`
